@@ -10,6 +10,8 @@ namespace CsMq
     {
         static void Main(string[] args)
         {
+            var server = new Server(3300);
+            server.Start();
         }
     }
 }
