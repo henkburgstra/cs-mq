@@ -10,20 +10,57 @@ namespace CsMq
     [DataContract]
     public struct Message
     {
-        [DataMember]
-        public String Sender;
+        [DataMember(Name = "sender", IsRequired = true)]
+        public string Sender;
 
-        [DataMember]
-        public String Function;
+        [DataMember(Name = "function", IsRequired = true)]
+        public string Function;
 
-        [DataMember]
-        public Boolean Relay;
+        [DataMember(Name = "relay", IsRequired = true)]
+        public bool Relay;
 
-        [DataMember]
-        public Boolean KeepAlive;
+        [DataMember(Name = "keepalive", IsRequired = true)]
+        public bool KeepAlive;
+
+        [DataMember(Name = "payload")]
+        public string Payload;
+
     }
 
-    class Server
+    public class Client
     {
+        public string Id
+        {
+            get; set;
+        }
+        public bool Alive
+        {
+            get; set;
+        }
+
+    }
+
+    public class Server
+    {
+        public int Port
+        {
+            get; set;
+        }
+
+        public bool KeepServing
+        {
+            get; set;
+        }
+
+        public Server(int port)
+        {
+            this.Port = port;
+        }
+
+        public bool Start()
+        {
+            return true;
+        }
+
     }
 }
