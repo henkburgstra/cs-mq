@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
@@ -59,6 +61,20 @@ namespace CsMq
 
         public bool Start()
         {
+            IPAddress adr = IPAddress.Parse("127.0.0.1");
+            TcpListener listener = new TcpListener(adr, this.Port);
+            try
+            {
+                listener.Start();
+            }
+            catch(SocketException e)
+            {
+                Console.WriteLine("SocketException: {0}", e);
+            }
+            finally
+            {
+                listener.Stop();
+            }
             return true;
         }
 
