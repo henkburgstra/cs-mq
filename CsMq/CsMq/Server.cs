@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Runtime.Serialization;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace CsMq
@@ -45,7 +46,12 @@ namespace CsMq
 
     public class Server
     {
+        public const string MSG_BEGIN = "__BOF__";
+        public const string MSG_END = "__EOF__";
+        public const string KEEP_ALIVE = "KEEP_ALIVE";
+
         private TcpListener listener;
+        private Regex reMsg = new Regex(@String.Format("(.*)({0})(.*)({1})(.*)", MSG_BEGIN, MSG_END), RegexOptions.Singleline);
 
         public int Port
         {
@@ -92,6 +98,7 @@ namespace CsMq
         private async Task HandleClient(TcpClient tcpClient)
         {
             char[] buf = new char[2048];
+            string data = "";
 
             try
             {
@@ -102,6 +109,15 @@ namespace CsMq
                 while (this.KeepServing)
                 {
                     int count = await reader.ReadAsync(buf, 0, 2048);
+                    data += new string(buf);
+                    Match match = reMsg.Match(data);
+                    if (match.Success)
+                    {
+                        Console.WriteLine("Dit is een OpenAC bericht");
+                        string msg = match.Groups[3].Value;
+                        Console.WriteLine(msg);
+                        data = "";
+                    }
                 }
             }
             catch (Exception ex)

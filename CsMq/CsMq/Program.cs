@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CsMq
@@ -14,7 +15,7 @@ namespace CsMq
             server.Start();
             while (server.KeepServing)
             {
-                System.Threading.Thread.Sleep(100);
+                Thread.Sleep(100);
             }
         }
     }
