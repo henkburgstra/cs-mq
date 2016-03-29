@@ -44,10 +44,14 @@ namespace CsMq
 
     public class Server
     {
+        private TcpListener listener;
+
         public int Port
         {
             get; set;
         }
+
+        public Dictionary<string, Client> Clients = new Dictionary<string, Client>();
 
         public bool KeepServing
         {
@@ -61,21 +65,32 @@ namespace CsMq
 
         public bool Start()
         {
+            bool started = true;
             IPAddress adr = IPAddress.Parse("127.0.0.1");
-            TcpListener listener = new TcpListener(adr, this.Port);
+            this.listener = new TcpListener(adr, this.Port);
             try
             {
-                listener.Start();
+                this.listener.Start();
+                this.KeepServing = true;
+                Task.Run(() => HandleClient());
             }
             catch(SocketException e)
             {
                 Console.WriteLine("SocketException: {0}", e);
+                started = false;
             }
             finally
             {
-                listener.Stop();
+                this.listener.Stop();
             }
-            return true;
+            return started;
+        }
+        private async Task HandleClient()
+        {
+            while (KeepServing)
+            {
+                var client = await listener.AcceptTcpClientAsync();
+            }
         }
 
     }
