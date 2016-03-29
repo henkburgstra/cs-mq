@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.Serialization;
+using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -51,7 +52,7 @@ namespace CsMq
         public const string KEEP_ALIVE = "KEEP_ALIVE";
 
         private TcpListener listener;
-        private Regex reMsg = new Regex(@String.Format("(.*)({0})(.*)({1})(.*)", MSG_BEGIN, MSG_END), RegexOptions.Singleline);
+        private Regex reMsg = new Regex(string.Format("(.*)({0})(.*)({1})(.*)", MSG_BEGIN, MSG_END), RegexOptions.Singleline);
 
         public int Port
         {
@@ -114,8 +115,13 @@ namespace CsMq
                     if (match.Success)
                     {
                         Console.WriteLine("Dit is een OpenAC bericht");
-                        string msg = match.Groups[3].Value;
-                        Console.WriteLine(msg);
+                        string strMsg = match.Groups[3].Value;
+                        Console.WriteLine(strMsg);
+                        DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(Message));
+                        MemoryStream messageStream = new MemoryStream();
+                        StreamWriter messageWriter = new StreamWriter(messageStream);
+                        messageWriter.Write(strMsg);
+                        Message msg = (Message)ser.ReadObject(messageStream);
                         data = "";
                     }
                 }
