@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -61,35 +62,51 @@ namespace CsMq
         public Server(int port)
         {
             this.Port = port;
+            this.KeepServing = true;
         }
 
-        public bool Start()
+        public async void Start()
         {
-            bool started = true;
             IPAddress adr = IPAddress.Parse("127.0.0.1");
             this.listener = new TcpListener(adr, this.Port);
             try
             {
                 this.listener.Start();
-                this.KeepServing = true;
-                Task.Run(() => HandleClient());
+                while (this.KeepServing)
+                {
+                    TcpClient tcpClient = await this.listener.AcceptTcpClientAsync();
+                    Task t = HandleClient(tcpClient);
+                    await t;
+                }
             }
             catch(SocketException e)
             {
                 Console.WriteLine("SocketException: {0}", e);
-                started = false;
             }
             finally
             {
                 this.listener.Stop();
             }
-            return started;
         }
-        private async Task HandleClient()
+
+        private async Task HandleClient(TcpClient tcpClient)
         {
-            while (KeepServing)
+            char[] buf = new char[2048];
+
+            try
             {
-                var client = await listener.AcceptTcpClientAsync();
+                NetworkStream stream = tcpClient.GetStream();
+                StreamReader reader = new StreamReader(stream);
+                StreamWriter writer = new StreamWriter(stream);
+                
+                while (this.KeepServing)
+                {
+                    int count = await reader.ReadAsync(buf, 0, 2048);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
         }
 

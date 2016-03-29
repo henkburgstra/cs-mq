@@ -12,6 +12,10 @@ namespace CsMq
         {
             var server = new Server(3300);
             server.Start();
+            while (server.KeepServing)
+            {
+                System.Threading.Thread.Sleep(100);
+            }
         }
     }
 }
