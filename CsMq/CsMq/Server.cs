@@ -114,7 +114,6 @@ namespace CsMq
             {
                 NetworkStream stream = tcpClient.GetStream();
                 StreamReader reader = new StreamReader(stream);
-                StreamWriter writer = new StreamWriter(stream);
                 
                 while (this.KeepServing)
                 {
