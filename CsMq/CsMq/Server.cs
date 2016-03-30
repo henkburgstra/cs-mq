@@ -96,6 +96,17 @@ namespace CsMq
             }
         }
 
+        public static Message MessageFromJson(string json)
+        {
+            Console.WriteLine(json);
+            DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(Message));
+            MemoryStream messageStream = new MemoryStream();
+            StreamWriter messageWriter = new StreamWriter(messageStream);
+            messageWriter.Write(json);
+            Message message = (Message)ser.ReadObject(messageStream);
+            return message;
+        }
+
         private async Task HandleClient(TcpClient tcpClient)
         {
             char[] buf = new char[2048];
@@ -115,13 +126,7 @@ namespace CsMq
                     if (match.Success)
                     {
                         Console.WriteLine("Dit is een OpenAC bericht");
-                        string strMsg = match.Groups[3].Value;
-                        Console.WriteLine(strMsg);
-                        DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(Message));
-                        MemoryStream messageStream = new MemoryStream();
-                        StreamWriter messageWriter = new StreamWriter(messageStream);
-                        messageWriter.Write(strMsg);
-                        Message msg = (Message)ser.ReadObject(messageStream);
+                        Message message = MessageFromJson(match.Groups[3].Value);
                         data = "";
                     }
                 }
