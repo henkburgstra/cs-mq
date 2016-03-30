@@ -99,11 +99,10 @@ namespace CsMq
         public static Message MessageFromJson(string json)
         {
             Console.WriteLine(json);
-            DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(Message));
-            MemoryStream messageStream = new MemoryStream();
-            StreamWriter messageWriter = new StreamWriter(messageStream);
-            messageWriter.Write(json);
-            Message message = (Message)ser.ReadObject(messageStream);
+            DataContractJsonSerializer js = new DataContractJsonSerializer(typeof(Message));
+            // TODO: UTF8 encoding
+            MemoryStream ms = new MemoryStream(System.Text.ASCIIEncoding.ASCII.GetBytes(json));
+            Message message = (Message)js.ReadObject(ms);
             return message;
         }
 
