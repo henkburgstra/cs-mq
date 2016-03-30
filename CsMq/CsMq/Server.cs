@@ -105,6 +105,18 @@ namespace CsMq
             return message;
         }
 
+        private void RelayMessage(Message message)
+        {
+            foreach (var item in Clients)
+            {
+                if (item.Key == message.Sender)
+                {
+                    continue;
+                }
+                Client client = item.Value;
+            }
+        }
+
         private async Task HandleClient(TcpClient tcpClient)
         {
             char[] buf = new char[2048];
@@ -125,6 +137,14 @@ namespace CsMq
                     {
                         Console.WriteLine("Dit is een OpenAC bericht");
                         Message message = MessageFromJson(match.Groups[3].Value);
+                        if (message.Relay == true)
+                        {
+                            RelayMessage(message);
+                        }
+                        if (!message.KeepAlive)
+                        {
+                            break;
+                        }
                         data = "";
                     }
                 }
