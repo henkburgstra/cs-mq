@@ -117,6 +117,7 @@ namespace CsMq
                 
                 while (this.KeepServing)
                 {
+					// todo: iets doen met count
                     int count = await reader.ReadAsync(buf, 0, 2048);
                     data += new string(buf);
                     Match match = reMsg.Match(data);
