@@ -100,8 +100,7 @@ namespace CsMq
         {
             Console.WriteLine(json);
             DataContractJsonSerializer js = new DataContractJsonSerializer(typeof(Message));
-            // TODO: UTF8 encoding
-            MemoryStream ms = new MemoryStream(System.Text.ASCIIEncoding.ASCII.GetBytes(json));
+            MemoryStream ms = new MemoryStream(UTF8Encoding.UTF8.GetBytes(json));
             Message message = (Message)js.ReadObject(ms);
             return message;
         }
