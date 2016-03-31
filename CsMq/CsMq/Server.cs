@@ -34,6 +34,16 @@ namespace CsMq
 
     public class Client
     {
+        public Client(string id, TcpClient connection)
+        {
+            this.Id = id;
+            this.Connection = connection;
+        }
+
+        public TcpClient Connection
+        {
+            get; set;
+        }
         public string Id
         {
             get; set;
@@ -41,6 +51,13 @@ namespace CsMq
         public bool Alive
         {
             get; set;
+        }
+        public void Send(Message message)
+        {
+            NetworkStream stream = Connection.GetStream();
+            StreamWriter writer = new StreamWriter(stream);
+            writer.Write(message.Payload);
+            writer.Flush();
         }
 
     }
@@ -105,6 +122,12 @@ namespace CsMq
             return message;
         }
 
+        private void AddClient(string id, TcpClient tcpclient)
+        {
+            var client = new Client(id, tcpclient);
+            this.Clients.Add(id, client);
+        }
+
         private void RelayMessage(Message message)
         {
             foreach (var item in Clients)
@@ -114,6 +137,7 @@ namespace CsMq
                     continue;
                 }
                 Client client = item.Value;
+                client.Send(message);
             }
         }
 
@@ -121,6 +145,7 @@ namespace CsMq
         {
             char[] buf = new char[2048];
             string data = "";
+            bool closeConnection = true;
 
             try
             {
@@ -129,24 +154,27 @@ namespace CsMq
                 
                 while (this.KeepServing)
                 {
-					// todo: iets doen met count
-                    int count = await reader.ReadAsync(buf, 0, 2048);
+                    await reader.ReadAsync(buf, 0, 2048);
                     data += new string(buf);
                     Match match = reMsg.Match(data);
                     if (match.Success)
                     {
-                        Console.WriteLine("Dit is een OpenAC bericht");
                         Message message = MessageFromJson(match.Groups[3].Value);
                         if (message.Relay == true)
                         {
                             RelayMessage(message);
                         }
-                        if (!message.KeepAlive)
+                        if (message.KeepAlive)
                         {
-                            break;
+                            closeConnection = false;
+                            AddClient(message.Sender, tcpClient);
                         }
-                        data = "";
+                        break;
                     }
+                }
+                if (closeConnection)
+                {
+                    tcpClient.Close();
                 }
             }
             catch (Exception ex)
