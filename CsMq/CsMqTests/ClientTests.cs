@@ -30,6 +30,7 @@ namespace CsMq.Tests
             }";
             Message message = Server.MessageFromJson(testMsg);
             string serializedMsg = Client.MessageToJson(message);
+            Message message2 = Server.MessageFromJson(serializedMsg);
             Assert.AreEqual(testMsg, serializedMsg);
         }
     }
