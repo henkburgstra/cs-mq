@@ -1,19 +1,20 @@
-﻿using System;
+﻿// Install-Package Newtonsoft.Json
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.Serialization;
-using System.Runtime.Serialization.Json;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace CsMq
 {
     [DataContract]
-    public class Message : IExtensibleDataObject
+    public class Message
     {
         [DataMember(Name = "sender", IsRequired = true)]
         public string Sender;
@@ -27,8 +28,8 @@ namespace CsMq
         [DataMember(Name = "keep_alive", IsRequired = true)]
         public bool KeepAlive;
 
-        public ExtensionDataObject ExtensionData { get; set; }
-
+        [DataMember(Name = "payload")]
+        public JObject Payload { get; set; }
     }
 
     public class Client
@@ -53,12 +54,8 @@ namespace CsMq
         }
         public static string MessageToJson(Message message)
         {
-            DataContractJsonSerializer js = new DataContractJsonSerializer(typeof(Message));
-            MemoryStream ms = new MemoryStream();
-            js.WriteObject(ms, message);
-            StreamReader reader = new StreamReader(ms);
-            ms.Seek(0, SeekOrigin.Begin);
-            return reader.ReadToEnd();
+            string output = JsonConvert.SerializeObject(message);
+            return output;
         }
 
         public void Send(Message message)
@@ -125,9 +122,7 @@ namespace CsMq
         public static Message MessageFromJson(string json)
         {
             Console.WriteLine(json);
-            DataContractJsonSerializer js = new DataContractJsonSerializer(typeof(Message));
-            MemoryStream ms = new MemoryStream(UTF8Encoding.UTF8.GetBytes(json));
-            Message message = (Message)js.ReadObject(ms);
+            Message message = JsonConvert.DeserializeObject<Message>(json);
             return message;
         }
 
