@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 namespace CsMq
 {
     [DataContract]
-    public struct Message
+    public class Message : IExtensibleDataObject
     {
         [DataMember(Name = "sender", IsRequired = true)]
         public string Sender;
@@ -27,8 +27,7 @@ namespace CsMq
         [DataMember(Name = "keep_alive", IsRequired = true)]
         public bool KeepAlive;
 
-        [DataMember(Name = "payload")]
-        public string Payload;
+        public ExtensionDataObject ExtensionData { get; set; }
 
     }
 
@@ -52,11 +51,21 @@ namespace CsMq
         {
             get; set;
         }
+        public static string MessageToJson(Message message)
+        {
+            DataContractJsonSerializer js = new DataContractJsonSerializer(typeof(Message));
+            MemoryStream ms = new MemoryStream();
+            js.WriteObject(ms, message);
+            StreamReader reader = new StreamReader(ms);
+            ms.Seek(0, SeekOrigin.Begin);
+            return reader.ReadToEnd();
+        }
+
         public void Send(Message message)
         {
             NetworkStream stream = Connection.GetStream();
             StreamWriter writer = new StreamWriter(stream);
-            writer.Write(message.Payload);
+ //           writer.Write(message.Payload);
             writer.Flush();
         }
 
