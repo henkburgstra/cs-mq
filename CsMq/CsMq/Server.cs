@@ -24,7 +24,7 @@ namespace CsMq
         [DataMember(Name = "relay", IsRequired = true)]
         public bool Relay;
 
-        [DataMember(Name = "keepalive", IsRequired = true)]
+        [DataMember(Name = "keep_alive", IsRequired = true)]
         public bool KeepAlive;
 
         [DataMember(Name = "payload")]
