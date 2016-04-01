@@ -38,12 +38,14 @@ namespace CsMq
         {
             return String.Format("{0}{1}{2}", MSG_BEGIN, data, MSG_END);
         }
+
         public static Message FromJson(string json)
         {
             Console.WriteLine(json);
             Message message = JsonConvert.DeserializeObject<Message>(json);
             return message;
         }
+
         public string ToJson()
         {
             return JsonConvert.SerializeObject(this);
@@ -71,12 +73,27 @@ namespace CsMq
             get; set;
         }
 
-        public void Send(Message message)
+        public bool Send(Message message)
         {
-            NetworkStream stream = Connection.GetStream();
-            StreamWriter writer = new StreamWriter(stream);
-            writer.Write(message.Envelope(message.ToJson()));
-            writer.Flush();
+            if (!Connection.Connected)
+            {
+                return false;
+            }
+
+            try
+            {
+                NetworkStream stream = Connection.GetStream();
+                StreamWriter writer = new StreamWriter(stream);
+                writer.Write(message.Envelope(message.ToJson()));
+                writer.Flush();
+            }
+            catch (Exception e)
+            {
+                // TODO: logging
+                return false;
+            }
+
+            return true;
         }
 
     }
@@ -134,8 +151,21 @@ namespace CsMq
             this.Clients.Add(id, client);
         }
 
+        private void PurgeClients(List<string> clients)
+        {
+            foreach (var key in clients)
+            {
+                if (Clients.ContainsKey(key))
+                {
+                    Clients.Remove(key);
+                }
+            }
+        }
+
         private void RelayMessage(Message message)
         {
+            List<string> deadClients = new List<string>();
+
             foreach (var item in Clients)
             {
                 if (item.Key == message.Sender)
@@ -143,7 +173,16 @@ namespace CsMq
                     continue;
                 }
                 Client client = item.Value;
-                client.Send(message);
+                var sent = client.Send(message);
+                if (!sent)
+                {
+                    deadClients.Add(item.Key);
+                }
+            }
+
+            if (deadClients.Count > 0)
+            {
+                PurgeClients(deadClients);
             }
         }
 
