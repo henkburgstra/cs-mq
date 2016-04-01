@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -11,6 +12,9 @@ namespace CsMq
     {
         static void Main(string[] args)
         {
+            Trace.Listeners.Clear();
+            Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
+
             var server = new Server(3300);
             server.Start();
             while (server.KeepServing)

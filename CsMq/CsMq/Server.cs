@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -41,7 +42,7 @@ namespace CsMq
 
         public static Message FromJson(string json)
         {
-            Console.WriteLine(json);
+            Trace.WriteLine(json);
             Message message = JsonConvert.DeserializeObject<Message>(json);
             return message;
         }
@@ -89,7 +90,7 @@ namespace CsMq
             }
             catch (Exception e)
             {
-                // TODO: logging
+                Trace.WriteLine(e.Message);
                 return false;
             }
 
