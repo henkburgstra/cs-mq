@@ -124,11 +124,13 @@ namespace CsMq
 
         public async void Start()
         {
-            IPAddress adr = IPAddress.Parse("127.0.0.1");
-            this.listener = new TcpListener(adr, this.Port);
+            string addr = "127.0.0.1";
+            IPAddress ipAddr = IPAddress.Parse(addr);
+            this.listener = new TcpListener(ipAddr, this.Port);
             try
             {
                 this.listener.Start();
+                Trace.WriteLine(String.Format("MessageQueue started at {0}:{1} ", addr, Port));
                 while (this.KeepServing)
                 {
                     TcpClient tcpClient = await this.listener.AcceptTcpClientAsync();

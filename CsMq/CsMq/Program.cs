@@ -15,7 +15,8 @@ namespace CsMq
             Trace.Listeners.Clear();
             Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
 
-            var server = new Server(3300);
+            int port = Properties.Settings.Default.messagequeue_port;
+            var server = new Server(port);
             server.Start();
             while (server.KeepServing)
             {
