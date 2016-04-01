@@ -61,18 +61,9 @@ namespace CsMq
             this.Connection = connection;
         }
 
-        public TcpClient Connection
-        {
-            get; set;
-        }
-        public string Id
-        {
-            get; set;
-        }
-        public bool Alive
-        {
-            get; set;
-        }
+        public TcpClient Connection { get; set; }
+        public string Id { get; set; }
+        public bool Alive { get; set; }
 
         public bool Send(Message message)
         {
@@ -101,26 +92,18 @@ namespace CsMq
 
     public class Server
     {
+        public Dictionary<string, Client> Clients = new Dictionary<string, Client>();
         private TcpListener listener;
         private Regex reMsg = new Regex(string.Format("(.*)({0})(.*)({1})(.*)", Message.MSG_BEGIN, Message.MSG_END), RegexOptions.Singleline);
-
-        public int Port
-        {
-            get; set;
-        }
-
-        public Dictionary<string, Client> Clients = new Dictionary<string, Client>();
-
-        public bool KeepServing
-        {
-            get; set;
-        }
 
         public Server(int port)
         {
             this.Port = port;
             this.KeepServing = true;
         }
+
+        public int Port { get; set; }
+        public bool KeepServing { get; set; }
 
         public async void Start()
         {
