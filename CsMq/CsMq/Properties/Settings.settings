@@ -5,5 +5,8 @@
     <Setting Name="messagequeue_port" Type="System.Int32" Scope="Application">
       <Value Profile="(Default)">3300</Value>
     </Setting>
+    <Setting Name="run_as_service" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

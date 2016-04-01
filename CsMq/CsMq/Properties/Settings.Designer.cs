@@ -31,5 +31,14 @@ namespace CsMq.Properties {
                 return ((int)(this["messagequeue_port"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool run_as_service {
+            get {
+                return ((bool)(this["run_as_service"]));
+            }
+        }
     }
 }
