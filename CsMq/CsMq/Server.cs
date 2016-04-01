@@ -16,6 +16,9 @@ namespace CsMq
     [DataContract]
     public class Message
     {
+        public const string MSG_BEGIN = "__BOF__";
+        public const string MSG_END = "__EOF__";
+
         [DataMember(Name = "sender", IsRequired = true)]
         public string Sender;
 
@@ -30,6 +33,21 @@ namespace CsMq
 
         [DataMember(Name = "payload")]
         public JObject Payload { get; set; }
+
+        public string Envelope(string data)
+        {
+            return String.Format("{0}{1}{2}", MSG_BEGIN, data, MSG_END);
+        }
+        public static Message FromJson(string json)
+        {
+            Console.WriteLine(json);
+            Message message = JsonConvert.DeserializeObject<Message>(json);
+            return message;
+        }
+        public string ToJson()
+        {
+            return JsonConvert.SerializeObject(this);
+        }
     }
 
     public class Client
@@ -52,17 +70,12 @@ namespace CsMq
         {
             get; set;
         }
-        public static string MessageToJson(Message message)
-        {
-            string output = JsonConvert.SerializeObject(message);
-            return output;
-        }
 
         public void Send(Message message)
         {
             NetworkStream stream = Connection.GetStream();
             StreamWriter writer = new StreamWriter(stream);
- //           writer.Write(message.Payload);
+            writer.Write(message.Envelope(message.ToJson()));
             writer.Flush();
         }
 
@@ -70,12 +83,8 @@ namespace CsMq
 
     public class Server
     {
-        public const string MSG_BEGIN = "__BOF__";
-        public const string MSG_END = "__EOF__";
-        public const string KEEP_ALIVE = "KEEP_ALIVE";
-
         private TcpListener listener;
-        private Regex reMsg = new Regex(string.Format("(.*)({0})(.*)({1})(.*)", MSG_BEGIN, MSG_END), RegexOptions.Singleline);
+        private Regex reMsg = new Regex(string.Format("(.*)({0})(.*)({1})(.*)", Message.MSG_BEGIN, Message.MSG_END), RegexOptions.Singleline);
 
         public int Port
         {
@@ -119,13 +128,6 @@ namespace CsMq
             }
         }
 
-        public static Message MessageFromJson(string json)
-        {
-            Console.WriteLine(json);
-            Message message = JsonConvert.DeserializeObject<Message>(json);
-            return message;
-        }
-
         private void AddClient(string id, TcpClient tcpclient)
         {
             var client = new Client(id, tcpclient);
@@ -163,7 +165,7 @@ namespace CsMq
                     Match match = reMsg.Match(data);
                     if (match.Success)
                     {
-                        Message message = MessageFromJson(match.Groups[3].Value);
+                        Message message = Message.FromJson(match.Groups[3].Value);
                         if (message.Relay == true)
                         {
                             RelayMessage(message);
