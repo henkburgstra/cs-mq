@@ -114,7 +114,7 @@ namespace CsMq
                 while (this.KeepServing)
                 {
                     TcpClient tcpClient = await this.listener.AcceptTcpClientAsync();
-                    Task t = HandleClient(tcpClient);
+                    Task t = HandleClientAsync(tcpClient);
                     await t;
                 }
             }
@@ -147,7 +147,7 @@ namespace CsMq
             }
         }
 
-        private async Task HandleClient(TcpClient tcpClient)
+        private async Task HandleClientAsync(TcpClient tcpClient)
         {
             char[] buf = new char[2048];
             string data = "";
